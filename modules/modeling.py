@@ -482,7 +482,8 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             visual_output = visual_output.permute(1, 0, 2)  # NLD -> LND
             # Pass text embedding (sequence_output) to gating function
             text_for_gate = sequence_output_.permute(1, 0, 2)  # NLD -> LND
-            fusion_output, _, _, attn_gate_list, ff_gate_list = self.transformerClip(visual_output, qa_output, text_for_gate, extended_video_mask)
+            # Returns: (fusion_output, audio, text, attn_mask, attn_gate_list, ff_gate_list)
+            fusion_output, _, _, _, attn_gate_list, ff_gate_list = self.transformerClip(visual_output, qa_output, text_for_gate, extended_video_mask)
             visual_output = visual_output.permute(1, 0, 2)  # LND -> NLD
             fusion_output = fusion_output.permute(1, 0, 2)
             qa_output = qa_output.permute(1, 0, 2)
