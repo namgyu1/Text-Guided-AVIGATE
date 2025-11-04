@@ -10,16 +10,16 @@ Tau=1.0
 
 # Default setting - VATEX Training with optimized memory settings
 OMP_NUM_THREADS=48 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --master_port $RPort --nproc_per_node=4 main_task_retrieval.py --do_train --num_thread_reader=12 \
-    --epochs=5 --batch_size=64 --n_display=50 --data_path ${DATA_PATH} --features_path ${DATA_PATH}/videos_all_compressed --audio_path ${DATA_PATH}/audio_all_compressed --output_dir ckpts/${CKPT_NAME} --lr 1e-4 \
+    --epochs=5 --batch_size=128 --n_display=50 --data_path ${DATA_PATH} --features_path ${DATA_PATH}/videos_all_compressed --audio_path ${DATA_PATH}/audio_all_compressed --output_dir ckpts/${CKPT_NAME} --lr 1e-4 \
     --max_words 32 --max_frames 12 --batch_size_val 16 --datatype vatex --feature_framerate 1 --coef_lr 1e-3 --freeze_layer_num 12  \
-    --slice_framepos 2 --loose_type --linear_patch 2d --sim_header seqTransf --pretrained_clip_name ViT-B/32 --eval_max_frame 12 --temperature $Tau --warmup_proportion 0.1 --cross_num_hidden_layers 4 --audio_query_layers 4 --beta $beta --margin_BD $Margin --gradient_accumulation_steps 2
+    --slice_framepos 2 --loose_type --linear_patch 2d --sim_header seqTransf --pretrained_clip_name ViT-B/32 --eval_max_frame 12 --temperature $Tau --warmup_proportion 0.1 --cross_num_hidden_layers 4 --audio_query_layers 4 --beta $beta --margin_BD $Margin --gradient_accumulation_steps 1
 
 
 # Resume mode
 """
 Resume_ep=0
 OMP_NUM_THREADS=48 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --master_port $RPort --nproc_per_node=4 main_task_retrieval.py --do_train --num_thread_reader=12 \
-    --epochs=5 --batch_size=64 --n_display=50 --data_path ${DATA_PATH} --features_path ${DATA_PATH}/videos_all_compressed --audio_path ${DATA_PATH}/audio_all_compressed --output_dir ckpts/${CKPT_NAME} --lr 1e-4 \
+    --epochs=5 --batch_size=128 --n_display=50 --data_path ${DATA_PATH} --features_path ${DATA_PATH}/videos_all_compressed --audio_path ${DATA_PATH}/audio_all_compressed --output_dir ckpts/${CKPT_NAME} --lr 1e-4 \
     --max_words 32 --max_frames 12 --batch_size_val 16 --datatype vatex --feature_framerate 1 --coef_lr 1e-3 --freeze_layer_num 12  \
-    --slice_framepos 2 --loose_type --linear_patch 2d --sim_header seqTransf --pretrained_clip_name ViT-B/32 --eval_max_frame 12 --temperature $Tau --warmup_proportion 0.1 --cross_num_hidden_layers 4 --audio_query_layers 4 --beta $beta --margin_BD $Margin --gradient_accumulation_steps 2 --resume_model ckpts/${CKPT_NAME}/pytorch_opt.bin.${Resume_ep} --init_model ckpts/${CKPT_NAME}/pytorch_model.bin.${Resume_ep}
+    --slice_framepos 2 --loose_type --linear_patch 2d --sim_header seqTransf --pretrained_clip_name ViT-B/32 --eval_max_frame 12 --temperature $Tau --warmup_proportion 0.1 --cross_num_hidden_layers 4 --audio_query_layers 4 --beta $beta --margin_BD $Margin --gradient_accumulation_steps 1 --resume_model ckpts/${CKPT_NAME}/pytorch_opt.bin.${Resume_ep} --init_model ckpts/${CKPT_NAME}/pytorch_model.bin.${Resume_ep}
 """
