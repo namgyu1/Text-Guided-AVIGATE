@@ -1,0 +1,24 @@
+# ===== Model weights & checkpoints =====
+*.bin
+*.pt
+*.pth
+ckpts/
+logs/
+
+# ===== Cache & temp files =====
+__pycache__/
+*.log
+*.tmp
+*.sg
+*.txt
+
+# ===== Notebook autosaves =====
+.ipynb_checkpoints/
+
+# ===== Python build =====
+*.pyc
+*.pyo
+*.pyd
+
+# ===== Misc =====
+Untitled*
