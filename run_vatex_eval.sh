@@ -1,6 +1,6 @@
-export MKL_NUM_THREADS=24
-export NUMEXPR_NUM_THREADS=24
-export OMP_NUM_THREADS=24
+export MKL_NUM_THREADS=4
+export NUMEXPR_NUM_THREADS=4
+export OMP_NUM_THREADS=4
 DATA_PATH=../datasets/VATEX
 RPort=$(shuf -i 1000-9999 -n1)
 Margin=0.1
