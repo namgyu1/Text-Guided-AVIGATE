@@ -342,7 +342,28 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             audio = F.interpolate(audio.unsqueeze(1), size=(384, 384), mode='bilinear', align_corners=False)
         audio = audio.squeeze(1)
 
-        audio_hidden = self.clip.encode_audio(audio).float()
+        # Process audio in smaller chunks to avoid OOM during evaluation
+        batch_size = audio.shape[0]
+        if batch_size > 4:  # Only chunk if batch is larger than 4
+            chunk_size = 4  # Process 4 audios at a time (conservative)
+            audio_hidden_list = []
+            
+            for i in range(0, batch_size, chunk_size):
+                end_idx = min(i + chunk_size, batch_size)
+                audio_chunk = audio[i:end_idx]
+                audio_hidden_chunk = self.clip.encode_audio(audio_chunk).float()
+                audio_hidden_list.append(audio_hidden_chunk)
+                
+                # Free memory immediately
+                del audio_chunk, audio_hidden_chunk
+                torch.cuda.empty_cache()
+            
+            audio_hidden = torch.cat(audio_hidden_list, dim=0)
+            del audio_hidden_list
+        else:
+            # Small batch, process directly
+            audio_hidden = self.clip.encode_audio(audio).float()
+        
         return audio_hidden
 
     def get_sequence_visual_output(self, input_ids, token_type_ids, attention_mask, video, video_mask, shaped=False, video_frame=-1):
