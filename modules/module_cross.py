@@ -257,10 +257,16 @@ class ResidualAttentionBlock_Gate(nn.Module):
         # Modified: Added text embedding (t) to the input tuple
         x, v, t, attn_mask, attn_gate_list, ff_gate_list = para_tuple
         
-        # Gating functions now use video (x), audio (v), and text (t) embeddings
-        attn_gate = self.attn_gate(torch.cat((x.mean(dim=0), v.mean(dim=0), t.mean(dim=0)), 1)).tanh()
-        ff_gate = self.ff_gate(torch.cat((x.mean(dim=0), v.mean(dim=0), t.mean(dim=0)), 1)).tanh()        
+        # DEBUG: Print shapes to understand the tensor dimensions
+        print(f"DEBUG x.shape: {x.shape}, v.shape: {v.shape}, t.shape: {t.shape}")
+        x_mean = x.mean(dim=0)
+        v_mean = v.mean(dim=0)
+        t_mean = t.mean(dim=0)
+        print(f"DEBUG after mean - x_mean: {x_mean.shape}, v_mean: {v_mean.shape}, t_mean: {t_mean.shape}")
         
+        # Gating functions now use video (x), audio (v), and text (t) embeddings
+        attn_gate = self.attn_gate(torch.cat((x_mean, v_mean, t_mean), 1)).tanh()
+        ff_gate = self.ff_gate(torch.cat((x_mean, v_mean, t_mean), 1)).tanh()        
 
         x = x + self.cross_attention(self.ln_3(x), v, attn_mask/100) * attn_gate
         x = x + self.cross_ff(self.ln_4(x)) * ff_gate
