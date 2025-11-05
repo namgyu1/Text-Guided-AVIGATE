@@ -404,13 +404,21 @@ def _run_on_single_gpu(model, batch_list_t, batch_list_v, batch_sequence_output_
                 # Expand to match the larger batch size
                 if text_batch_size > video_batch_size:
                     # Repeat video/audio to match text batch size
-                    visual_output = visual_output.repeat(text_batch_size, 1, 1)
-                    audio_output = audio_output.repeat(text_batch_size, 1, 1)
-                    video_mask = video_mask.repeat(text_batch_size, 1)
+                    # Handle different tensor dimensions properly
+                    repeat_dims_visual = [text_batch_size] + [1] * (visual_output.dim() - 1)
+                    repeat_dims_audio = [text_batch_size] + [1] * (audio_output.dim() - 1)
+                    repeat_dims_mask = [text_batch_size] + [1] * (video_mask.dim() - 1)
+                    
+                    visual_output = visual_output.repeat(*repeat_dims_visual)
+                    audio_output = audio_output.repeat(*repeat_dims_audio)
+                    video_mask = video_mask.repeat(*repeat_dims_mask)
                 else:
                     # Repeat text to match video batch size
-                    sequence_output_to_use = sequence_output_batch.repeat(video_batch_size, 1, 1)
-                    input_mask = input_mask_orig.repeat(video_batch_size, 1)
+                    repeat_dims_seq = [video_batch_size] + [1] * (sequence_output_batch.dim() - 1)
+                    repeat_dims_input = [video_batch_size] + [1] * (input_mask_orig.dim() - 1)
+                    
+                    sequence_output_to_use = sequence_output_batch.repeat(*repeat_dims_seq)
+                    input_mask = input_mask_orig.repeat(*repeat_dims_input)
             
             b1b2_logits, gate_tuple,*_tmp = model.get_similarity_logits(sequence_output_to_use, visual_output, audio_output, input_mask, video_mask,
                                                                      loose_type=model.loose_type)
