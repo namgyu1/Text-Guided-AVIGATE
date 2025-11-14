@@ -10,6 +10,7 @@ import logging
 import tarfile
 import tempfile
 import shutil
+from typing import Tuple
 
 import torch
 from torch import nn
@@ -233,6 +234,13 @@ class ResidualAttentionBlock_Gate(nn.Module):
             ("fg_proj", nn.Linear(int(d_model * 0.5), 1, bias = False))
         ]))
         
+        # New: Query fusion gate for multi-modal query (video + text fusion)
+        self.query_gate = nn.Sequential(OrderedDict([
+            ("qg_fc", nn.Linear(int(d_model * 3), int(d_model * 0.5), bias = False)),
+            ("qg_gelu", QuickGELU()),
+            ("qg_proj", nn.Linear(int(d_model * 0.5), 1, bias = False))
+        ]))
+        
         self.ln_3 = LayerNorm(d_model)
         self.ln_4 = LayerNorm(d_model)        
 
@@ -255,30 +263,50 @@ class ResidualAttentionBlock_Gate(nn.Module):
     
     def forward(self, para_tuple: tuple):
         # Modified: Added text embedding (t) to the input tuple
-        x, v, t, attn_mask, attn_gate_list, ff_gate_list = para_tuple
+        x, v, t, attn_mask, attn_gate_list, ff_gate_list, query_gate_list = para_tuple
         
-        # DEBUG: Print shapes to understand the tensor dimensions
-        #print(f"DEBUG x.shape: {x.shape}, v.shape: {v.shape}, t.shape: {t.shape}")
+        # Pooling: Get mean representations for gating functions
         x_mean = x.mean(dim=0)
         v_mean = v.mean(dim=0)
         t_mean = t.mean(dim=0)
-        #print(f"DEBUG after mean - x_mean: {x_mean.shape}, v_mean: {v_mean.shape}, t_mean: {t_mean.shape}")
         
+        # --- Multi-Modal Query Fusion ---
+        # Create fused query by combining video and text embeddings
+        # query_gate_weight: 0~1 value (sigmoid activation)
+        query_gate_weight = self.query_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).sigmoid()
+        # Fused query = video * query_gate + text * (1 - query_gate)
+        fused_query = x * query_gate_weight + t * (1 - query_gate_weight)
+        
+        # --- Gating functions for audio fusion ---
         # Gating functions now use video (x), audio (v), and text (t) embeddings
         attn_gate = self.attn_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()
         ff_gate = self.ff_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()        
 
-        x = x + self.cross_attention(self.ln_3(x), v, attn_mask/100) * attn_gate
+        # --- Cross-modal fusion with audio ---
+        # Use fused_query instead of original video embedding for cross attention
+        x = x + self.cross_attention(self.ln_3(fused_query), v, attn_mask/100) * attn_gate
         x = x + self.cross_ff(self.ln_4(x)) * ff_gate
         
+        # --- Self-attention and feed-forward ---
         x = x + self.attention(self.ln_1(x), attn_mask=None)
         x = x + self.mlp(self.ln_2(x))
         
+        # Store gate values for analysis
         attn_gate_list.append(attn_gate.view(-1))
         ff_gate_list.append(ff_gate.view(-1))
-
+        query_gate_list.append(query_gate_weight.view(-1))
         
-        return (x, v, t, attn_mask, attn_gate_list, ff_gate_list)
+        # DEBUG: Print gate statistics periodically (enable during debugging)
+        # if self.training and len(attn_gate_list) % 100 == 0:
+        #     print(f"\n[Layer {len(attn_gate_list)}] Gate Statistics:")
+        #     print(f"  Query Gate: mean={query_gate_weight.mean():.4f}, std={query_gate_weight.std():.4f}, "
+        #           f"min={query_gate_weight.min():.4f}, max={query_gate_weight.max():.4f}")
+        #     print(f"  Attn Gate:  mean={attn_gate.mean():.4f}, std={attn_gate.std():.4f}, "
+        #           f"min={attn_gate.min():.4f}, max={attn_gate.max():.4f}")
+        #     print(f"  FF Gate:    mean={ff_gate.mean():.4f}, std={ff_gate.std():.4f}, "
+        #           f"min={ff_gate.min():.4f}, max={ff_gate.max():.4f}")
+        
+        return (x, v, t, attn_mask, attn_gate_list, ff_gate_list, query_gate_list)
 
 ### Transformer_Gate denotes Gated_Fusion_Transformer in the paper. ###
 class Transformer_Gate(nn.Module):
@@ -296,11 +324,12 @@ class Transformer_Gate(nn.Module):
             t: text embedding (for gating function)
             attn_mask: attention mask
         Returns:
-            Tuple of (output, audio, text, attn_mask, attn_gate_list, ff_gate_list)
+            Tuple of (output, audio, text, attn_mask, attn_gate_list, ff_gate_list, query_gate_list)
         """
         attn_gate_list = []
         ff_gate_list = []
-        return self.resblocks((q, v, t, attn_mask, attn_gate_list, ff_gate_list)) 
+        query_gate_list = []
+        return self.resblocks((q, v, t, attn_mask, attn_gate_list, ff_gate_list, query_gate_list)) 
 
 class CrossEmbeddings(nn.Module):
     """Construct the embeddings from word, position and token_type embeddings.
