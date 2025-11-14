@@ -425,6 +425,7 @@ def _run_on_single_gpu(model, batch_list_t, batch_list_v, batch_sequence_output_
             b1b2_logits = b1b2_logits.cpu().detach().numpy()
             b1b2_attn = gate_tuple[0].cpu().detach().numpy()
             b1b2_ff = gate_tuple[1].cpu().detach().numpy()
+            # b1b2_query = gate_tuple[2].cpu().detach().numpy()  # Optional: store query gate
 
             each_row.append(b1b2_logits)
             each_attn_gate_row.append(b1b2_attn)

@@ -502,8 +502,8 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             # sequence_output shape: [batch, seq_len, dim]
             # Need to permute to [seq_len, batch, dim] for transformer input
             text_for_gate = sequence_output_.permute(1, 0, 2)  # [batch, seq_len, dim] -> [seq_len, batch, dim]
-            # Returns: (fusion_output, audio, text, attn_mask, attn_gate_list, ff_gate_list)
-            fusion_output, _, _, _, attn_gate_list, ff_gate_list = self.transformerClip(visual_output, qa_output, text_for_gate, extended_video_mask)
+            # Returns: (fusion_output, audio, text, attn_mask, attn_gate_list, ff_gate_list, query_gate_list)
+            fusion_output, _, _, _, attn_gate_list, ff_gate_list, query_gate_list = self.transformerClip(visual_output, qa_output, text_for_gate, extended_video_mask)
             visual_output = visual_output.permute(1, 0, 2)  # LND -> NLD
             fusion_output = fusion_output.permute(1, 0, 2)
             qa_output = qa_output.permute(1, 0, 2)
@@ -557,7 +557,7 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
                 margin_ths = torch.clamp((1-(sim_tt+sim_vv)*0.5)*beta, max=margin).fill_diagonal_(0)
             return retrieve_logits+margin_ths*logit_scale
         else:
-            return retrieve_logits, (torch.stack(attn_gate_list,1), torch.stack(ff_gate_list,1))
+            return retrieve_logits, (torch.stack(attn_gate_list,1), torch.stack(ff_gate_list,1), torch.stack(query_gate_list,1))
         
     ### Not used ###
     def _cross_similarity(self, sequence_output, visual_output, attention_mask, video_mask):
