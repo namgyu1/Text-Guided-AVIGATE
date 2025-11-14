@@ -8,7 +8,7 @@ DATA_PATH=../datasets/MSRVTT
 RPort=$(shuf -i 1000-9999 -n1)
 Margin=0.1
 beta=0.2
-CKPT_NAME=TAVIGATE_L2
+CKPT_NAME=TAVIGATE
 Tau=1.0
 
 # Set the epoch number to resume from (e.g., 0 for epoch 1, 1 for epoch 2, etc.)
