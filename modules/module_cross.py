@@ -274,13 +274,18 @@ class ResidualAttentionBlock_Gate(nn.Module):
         # Create fused query by combining video and text embeddings
         # query_gate_weight: 0~1 value (sigmoid activation)
         query_gate_weight = self.query_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).sigmoid()
+        # Clamp to prevent extreme values (0.05 ~ 0.95)
+        query_gate_weight = torch.clamp(query_gate_weight, min=0.05, max=0.95)
         # Fused query = video * query_gate + text * (1 - query_gate)
         fused_query = x * query_gate_weight + t * (1 - query_gate_weight)
         
         # --- Gating functions for audio fusion ---
         # Gating functions now use video (x), audio (v), and text (t) embeddings
         attn_gate = self.attn_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()
-        ff_gate = self.ff_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()        
+        ff_gate = self.ff_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()
+        # Clamp to prevent extreme values (-0.9 ~ 0.9)
+        attn_gate = torch.clamp(attn_gate, min=-0.9, max=0.9)
+        ff_gate = torch.clamp(ff_gate, min=-0.9, max=0.9)
 
         # --- Cross-modal fusion with audio ---
         # Use fused_query instead of original video embedding for cross attention
