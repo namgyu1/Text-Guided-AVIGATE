@@ -9,7 +9,7 @@ CKPT_NAME=ckpts_vatex
 Tau=1.0
 
 # Evaluation with memory-optimized settings
-epoch=$(seq 0 4)
+epoch=$(seq 2 2)
 for ep in $epoch
 do
     OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --master_port $RPort --nproc_per_node=1 main_task_retrieval.py --do_eval --num_thread_reader=4 \

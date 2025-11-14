@@ -7,7 +7,7 @@ Margin=0.1
 beta=0.2
 CKPT_NAME=ckpt_name
 Tau=1.0
-epoch=$(seq 1 1)
+epoch=$(seq 2 2)
 for ep in $epoch
 do
     OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --master_port $RPort --nproc_per_node=1 main_task_retrieval.py --do_eval --num_thread_reader=4 \
