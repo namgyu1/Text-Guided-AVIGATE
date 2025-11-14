@@ -233,17 +233,17 @@ class ResidualAttentionBlock_Gate(nn.Module):
             ("fg_gelu", QuickGELU()),
             ("fg_proj", nn.Linear(int(d_model * 0.5), 1, bias = False))
         ]))
-        
-        nn.init.normal_(self.attn_gate[0].weight, mean=0.0, std=0.01)
-        nn.init.normal_(self.attn_gate[2].weight, mean=0.0, std=0.01)
+        # Don't initialize attn_gate and ff_gate to zero - they control pretrained audio fusion
+        # Let them use default initialization to preserve learned audio features
         
         # New: Query fusion gate for multi-modal query (video + text fusion)
-        # Initialize with small weights to prevent disrupting pretrained features
         self.query_gate = nn.Sequential(OrderedDict([
             ("qg_fc", nn.Linear(int(d_model * 3), int(d_model * 0.5), bias = False)),
             ("qg_gelu", QuickGELU()),
             ("qg_proj", nn.Linear(int(d_model * 0.5), 1, bias = False))
         ]))
+        # Use default initialization (Xavier for Linear layers)
+        # This allows text to contribute from the start, but normalization keeps it stable
         
         self.ln_3 = LayerNorm(d_model)
         self.ln_4 = LayerNorm(d_model)        
@@ -277,14 +277,20 @@ class ResidualAttentionBlock_Gate(nn.Module):
         # --- Multi-Modal Query Fusion (Text Pooling + Weighted Sum) ---
         # Pool text tokens [20, batch, dim] -> [1, batch, dim]
         t_pooled = t.mean(dim=0, keepdim=True)
+        
+        # CRITICAL: Normalize pooled text to match video feature scale
+        # Video features are L2-normalized from CLIP, text should be too
+        t_pooled = t_pooled / (t_pooled.norm(dim=-1, keepdim=True) + 1e-8)
+        
         # Expand to match video frames: [1, batch, dim] -> [12, batch, dim]
         t_expanded = t_pooled.expand(x.size(0), -1, -1)
         
         # Learn gate weight for video-text fusion
-        # tanh output: [-1, 1], start small due to initialization
+        # tanh output: [-1, 1], controls text contribution strength
         query_gate_weight = self.query_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()
                 
-        # Weighted sum: video + text * (small_gate)
+        # Weighted residual: video + text * gate
+        # Both x and t_expanded are normalized, so addition is safe
         fused_query = x + t_expanded * query_gate_weight
         
         # --- Gating functions for audio fusion ---
