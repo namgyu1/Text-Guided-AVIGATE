@@ -284,11 +284,7 @@ class ResidualAttentionBlock_Gate(nn.Module):
         # Learn gate weight for video-text fusion
         # tanh output: [-1, 1], start small due to initialization
         query_gate_weight = self.query_gate(torch.cat((x_mean, v_mean, t_mean), dim=1)).tanh()
-        
-        # Scale down the gate to prevent sudden feature changes
-        # This allows gradual integration of text information
-        query_gate_weight = query_gate_weight * 0.1  # Scale to [-0.1, 0.1]
-        
+                
         # Weighted sum: video + text * (small_gate)
         fused_query = x + t_expanded * query_gate_weight
         
