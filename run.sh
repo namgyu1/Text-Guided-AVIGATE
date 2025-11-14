@@ -5,7 +5,7 @@ DATA_PATH=../datasets/MSRVTT
 RPort=$(shuf -i 1000-9999 -n1)
 Margin=0.1
 beta=0.2
-CKPT_NAME=ckpt_name
+CKPT_NAME=TAVIGATE
 Tau=1.0
 # Default setting
 OMP_NUM_THREADS=48 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --master_port $RPort --nproc_per_node=4 main_task_retrieval.py --do_train --num_thread_reader=12 \
