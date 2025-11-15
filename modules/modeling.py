@@ -134,15 +134,34 @@ class CLIP4ClipPreTrainedModel(PreTrainedModel, nn.Module):
 
 
 def _LSE_real(x, lambda_, mask=None, d=1):
-    x_=torch.exp(x*lambda_)
-    # import pdb; pdb.set_trace()
+    scaled = x * lambda_
+    mask_ = None
     if mask is not None:
-        mask_ = mask.unsqueeze(0).expand(x_.shape[0],-1,-1)
-        x_ = (x_*mask_).sum(dim=d)
+        mask_ = mask.unsqueeze(0).expand(scaled.shape[0], -1, -1)
+        scaled_for_max = scaled.masked_fill(mask_ == 0, float('-inf'))
     else:
-        x_ = x_.sum(dim=d)
-    out = torch.log(x_)
+        scaled_for_max = scaled
+
+    max_val, _ = torch.max(scaled_for_max, dim=d, keepdim=True)
+    max_val = torch.where(torch.isfinite(max_val), max_val, torch.zeros_like(max_val))
+
+    shifted = scaled - max_val
+    shifted = torch.clamp(shifted, min=-50.0, max=50.0)
+    exp_shifted = torch.exp(shifted)
+    if mask_ is not None:
+        exp_shifted = exp_shifted * mask_.to(exp_shifted.dtype)
+
+    sum_exp = exp_shifted.sum(dim=d).clamp_min(1e-10)
+    out = max_val.squeeze(d) + torch.log(sum_exp)
     return out
+
+
+def _safe_l2_normalize(x, dim=-1, eps=1e-6):
+    norm = x.norm(dim=dim, keepdim=True)
+    norm = torch.nan_to_num(norm, nan=0.0, posinf=0.0, neginf=0.0)
+    denom = norm.clamp_min(eps)
+    normalized = x / denom
+    return torch.nan_to_num(normalized)
 
 
 def show_log(task_config, info):
@@ -522,29 +541,24 @@ class CLIP4Clip(CLIP4ClipPreTrainedModel):
             audio_mask = allgather(audio_mask, self.task_config)
             torch.distributed.barrier()
             
-        qa_output_global = self._mean_pooling_for_similarity_visual(qa_output, audio_mask)
-        qa_output_global = qa_output_global / (qa_output_global.norm(dim=-1, keepdim=True) + 1e-8)
+        qa_output_global = _safe_l2_normalize(self._mean_pooling_for_similarity_visual(qa_output, audio_mask))
 
-        av_fused_output = fusion_output#[:, qa_output.shape[1]:]
-        av_fused_output = av_fused_output / (av_fused_output.norm(dim=-1, keepdim=True) + 1e-8)
+        av_fused_output = _safe_l2_normalize(fusion_output)
 
-        av_fused_output_global = self._mean_pooling_for_similarity_visual(av_fused_output, video_mask)
-        av_fused_output_global = av_fused_output_global / (av_fused_output_global.norm(dim=-1, keepdim=True) + 1e-8)
+        av_fused_output_global = _safe_l2_normalize(
+            self._mean_pooling_for_similarity_visual(av_fused_output, video_mask)
+        )
 
-        visual_output_local = visual_output_original#[:, qa_output.shape[1]:]
-        visual_output_local = visual_output_local / (visual_output_local.norm(dim=-1, keepdim=True) + 1e-8)
+        visual_output_local = _safe_l2_normalize(visual_output_original)
 
-        visual_output_global = self._mean_pooling_for_similarity_visual(visual_output_local, video_mask)
-        visual_output_global = visual_output_global / (visual_output_global.norm(dim=-1, keepdim=True) + 1e-8)
+        visual_output_global = _safe_l2_normalize(
+            self._mean_pooling_for_similarity_visual(visual_output_local, video_mask)
+        )
 
-        sequence_output_ = sequence_output_ / (sequence_output_.norm(dim=-1, keepdim=True) + 1e-8)
+        sequence_output_ = _safe_l2_normalize(sequence_output_)
 
-
-        # Clamp logit_scale to prevent numerical instability in softmax
-        # Original CLIP uses exp(logit_scale), but unbounded growth causes NaN
-        # Limit: exp(4.6) = 100 is sufficient for contrastive learning
         logit_scale = self.clip.logit_scale.exp()
-        logit_scale = torch.clamp(logit_scale, max=100)
+        logit_scale = torch.clamp(logit_scale, max=100.0)
         lamb = self.lambda_
 
 
