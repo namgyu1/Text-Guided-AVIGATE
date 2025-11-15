@@ -4,14 +4,14 @@ This repository provides an extended implementation of AVIGATE (CVPR 2025 Oral) 
 
 The goal of this project is to improve Video-Text Retrieval by allowing the semantic intent of a text query to dynamically control multimodal fusion.
 
-Performance
+## Performance
 
 On MSRVTT (CLIP-ViT B/32):
 | Model | R@1 |
-| --- | --- |
+|-------|------|
 | Original AVIGATE | 50.2% |
 | GAID (recent SOTA) | 55.0% |
-| Text-Guided AVIGATE (ours) | 63.8% |
+| **Text-Guided AVIGATE (ours)** | **65.0%** |
 
 *Achieves state-of-the-art performance among ViT-B/32–based methods on MSRVTT.*
 
