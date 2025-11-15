@@ -232,9 +232,21 @@ class LayerNorm(nn.LayerNorm):
 
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
+        # Emergency NaN check
+        if torch.isnan(x).any() or torch.isinf(x).any():
+            print(f"[GELU CRITICAL] NaN/Inf input! Stats: mean={x.mean():.4f}, max={x.abs().max():.4f}")
+            x = torch.nan_to_num(x, nan=0.0, posinf=10.0, neginf=-10.0)
+        
         # Clip input to prevent sigmoid overflow (sigmoid saturates at ±20)
-        x_clipped = torch.clamp(x, min=-20.0, max=20.0)
-        return x_clipped * torch.sigmoid(1.702 * x_clipped)
+        x_clipped = torch.clamp(x, min=-10.0, max=10.0)
+        result = x_clipped * torch.sigmoid(1.702 * x_clipped)
+        
+        # Verify output
+        if torch.isnan(result).any():
+            print(f"[GELU CRITICAL] NaN in output! Returning zeros.")
+            return torch.zeros_like(x)
+        
+        return result
 
 
 class ResidualAttentionBlock(nn.Module):
@@ -280,17 +292,26 @@ class ResidualAttentionBlock(nn.Module):
             print(f"[CLIP DEBUG] NaN/Inf in LayerNorm! Input stats - mean: {x.mean().item():.4f}, std: {x.std().item():.4f}, max: {x.abs().max().item():.4f}")
             ln_out = torch.nan_to_num(ln_out, nan=0.0, posinf=1e4, neginf=-1e4)
         
-        # Clip before MLP to prevent explosion
-        ln_out = torch.clamp(ln_out, min=-50.0, max=50.0)
+        # Stronger clipping before MLP to prevent explosion
+        ln_out = torch.clamp(ln_out, min=-10.0, max=10.0)
         
         mlp_out = self.mlp(ln_out)
         
         # Check for NaN after MLP
-        if torch.isnan(mlp_out).any():
-            print(f"[CLIP DEBUG] NaN in MLP output!")
-            mlp_out = torch.nan_to_num(mlp_out, nan=0.0, posinf=1e4, neginf=-1e4)
+        if torch.isnan(mlp_out).any() or torch.isinf(mlp_out).any():
+            print(f"[CLIP DEBUG] NaN/Inf in MLP output! Replacing with zeros.")
+            mlp_out = torch.zeros_like(mlp_out)
+        
+        # Clip MLP output as well
+        mlp_out = torch.clamp(mlp_out, min=-10.0, max=10.0)
         
         x = x + mlp_out
+        
+        # Final safety check
+        if torch.isnan(x).any():
+            print(f"[CLIP DEBUG] NaN in final output! This should never happen!")
+            x = torch.nan_to_num(x, nan=0.0)
+        
         return (x, video_frame)
 
 class Transformer(nn.Module):

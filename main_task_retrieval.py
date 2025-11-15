@@ -314,15 +314,27 @@ def train_epoch(epoch, args, model, train_dataloader, device, n_gpu, optimizer, 
         input_ids, input_mask, segment_ids, video, video_mask,  audio = batch
 
 
+        # Check for NaN in input data BEFORE forward pass
+        if torch.isnan(video).any() or torch.isnan(audio).any():
+            logger.warning(f"NaN in input data at step {step}! Skipping this batch.")
+            continue
+        
+        # Check if model parameters have exploded
+        if step > 0 and step % 100 == 0:
+            max_param = max(p.abs().max().item() for p in model.parameters() if p.requires_grad)
+            if max_param > 1e6:
+                logger.warning(f"Model parameters exploding at step {step}! Max param: {max_param:.2e}")
+        
         d_start_time = time.time()
         loss = model(input_ids, segment_ids, input_mask, video, video_mask, audio)
         data_time += time.time()-d_start_time
         
-        # Check for NaN loss immediately
-        if torch.isnan(loss).any():
-            logger.warning(f"NaN loss detected at step {step}! Skipping this batch.")
-            optimizer.zero_grad()  # CRITICAL: Clear gradients to prevent memory leak
-            torch.cuda.empty_cache()  # Release cached memory
+        # Check for NaN loss immediately with detailed logging
+        if torch.isnan(loss).any() or torch.isinf(loss).any():
+            logger.warning(f"NaN/Inf loss at step {step}! Loss value: {loss}")
+            logger.warning(f"Video shape: {video.shape}, Audio shape: {audio.shape}")
+            optimizer.zero_grad()
+            torch.cuda.empty_cache()
             continue
         
         # Store the original loss for logging before dividing
