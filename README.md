@@ -1,20 +1,47 @@
-# Text-Guided AVIGATE: Audio-Guided Video Representation with Text-Guided Gated Attention for Text-to-Video Retrieval (based on AVIGATE, CVPR 2025, Oral)
+# Text-Guided AVIGATE: Audio-Guided Video Representation with Text-Guided Gated Attention for Text-to-Video Retrieval
+**(Based on AVIGATE, CVPR 2025 Oral)**
 
-This repository provides an extended implementation of AVIGATE (CVPR 2025 Oral) with a Text-Guided Gating Mechanism and Gated Fusion Transformer, where the text query directly influences the audio–visual fusion process.
+This repository provides an extended implementation of [AVIGATE (CVPR 2025 Oral)]([https://github.com/BoseungJeong/AVIGATE-CVPR2025]) with a multi-level **Text-Guided (Query-Aware)** mechanism.
 
-The goal of this project is to improve Video-Text Retrieval by allowing the semantic intent of a text query to dynamically control multimodal fusion.
+The goal of this project is to improve Text-to-Video Retrieval performance by allowing the semantic intent of the text query (T) to dynamically influence and control the audio-visual (V-A) fusion process.
 
 ## Performance
 
 On MSRVTT (CLIP-ViT B/32):
-| Model | R@1 |
-|-------|------|
-| Original AVIGATE | 50.2% |
-| GAID (recent SOTA) | 55.0% |
-| **Text-Guided AVIGATE (ours)** | **65.0%** |
+| Model | R@1 | R@5 | R@10 |
+| :--- | :---: | :---: | :---: |
+| Original AVIGATE (CVPR 2025) | 50.2% | 74.3% | 83.2% |
+| GAID (Recent SOTA) | 55.0% | 83.0% | 89.9% |
+| **Text-Guided AVIGATE (Ours)** | **63.9%** | **88.0%** | **93.1%** |
 
-*Achieves state-of-the-art performance among ViT-B/32–based methods on MSRVTT.*
+*(This work achieved a **+13.7%p** improvement in R@1 over the original SOTA baseline.)*
 
+---
+
+## 1. Problem: The 'Text-Agnostic' Limitation of AVIGATE
+
+The original AVIGATE model achieves SOTA by selectively fusing audio (A) and visual (V) information using a Gated Fusion Transformer.
+
+However, this fusion process is **Text-Agnostic**. The gating mechanism only considers the relationship *within* the video (V-A interaction) and **completely ignores the text query (T)**.
+
+This is suboptimal. The relevance of an audio cue is highly dependent on the text query.
+
+## 2. Solution: 'Query-Aware' (Text-Guided) Architecture
+
+To solve this, I redesigned the Gated Fusion Transformer to be **Query-Aware**, making the text query (T) an active participant in the fusion process at multiple levels.
+
+### Key Architectural Contributions:
+
+1.  **Text-Conditioned Gating Function :**
+    The `Gating Function` was modified to accept the Text Embedding (T) as an additional condition. This allows the model to decide *how much* audio to fuse based on *what* the user is searching for (the semantic intent of T).
+
+2.  **Text-Injected MHA Query :**
+    The `MHA` (Multi-Head Attention) block was modified. The Text Embedding (T) is now injected directly into the Visual Frame Query. This allows the model to look for text and video-relevant audio features.
+
+3.  **Gated Text Injection (Gate for L-Injection):**
+    To prevent the text query from overpowering the visual features, a **new MLP gate** was implemented. This gate dynamically controls the *amount* of text information (T) injected into the MHA Query, based on the context of all three modalities (T, V, and A).
+
+---
 ## Requirement
 ```sh
 # From CLIP
