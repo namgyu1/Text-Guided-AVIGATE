@@ -374,6 +374,14 @@ def train_epoch(epoch, args, model, train_dataloader, device, n_gpu, optimizer, 
                 torch.clamp_(model.clip.logit_scale.data, max=np.log(100))
 
             global_step += 1
+            
+            # Auto-save checkpoint every 200 steps for safety
+            if global_step % 200 == 0 and local_rank == 0:
+                checkpoint_name = f"step_{global_step}"
+                current_loss = total_loss / max(1, step + 1)
+                save_model(epoch, args, model, optimizer, current_loss, scheduler=scheduler, 
+                          global_step=global_step, type_name=checkpoint_name)
+                logger.info(f"💾 Checkpoint saved at step {global_step}")
 
             if global_step % log_step == 0 and local_rank == 0:
                 logger.info("Epoch: %d/%s, Step: %d/%d, Lr: %s, Loss: %f, Time/step: %f, DTime/step: %f", epoch + 1,
