@@ -11,7 +11,7 @@ On MSRVTT (CLIP-ViT B/32):
 |-------|------|
 | Original AVIGATE | 50.2% |
 | GAID (recent SOTA) | 55.0% |
-| **Text-Guided AVIGATE (ours)** | **65.0%** |
+| **Text-Guided AVIGATE (ours)** | **63.8%** |
 
 *Achieves state-of-the-art performance among ViT-B/32–based methods on MSRVTT.*
 
