@@ -3,7 +3,7 @@
 
 This repository provides an extended implementation of [AVIGATE (CVPR 2025 Oral)]([https://github.com/BoseungJeong/AVIGATE-CVPR2025]) with a multi-level **Text-Guided (Query-Aware)** mechanism.
 
-The goal of this project is to improve Text-to-Video Retrieval performance by allowing the semantic intent of the text query (L) to dynamically influence and control the audio-visual (V-A) fusion process.
+The goal of this project is to improve Text-to-Video Retrieval performance by allowing the semantic intent of the text query (T) to dynamically influence and control the audio-visual (V-A) fusion process.
 
 ## Performance
 
