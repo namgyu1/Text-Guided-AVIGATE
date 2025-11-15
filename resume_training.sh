@@ -8,11 +8,11 @@ DATA_PATH=../datasets/MSRVTT
 RPort=$(shuf -i 1000-9999 -n1)
 Margin=0.1
 beta=0.2
-CKPT_NAME=TAVIGATE
+CKPT_NAME=TAVIGATE_L2
 Tau=1.0
 
 # Set the epoch number to resume from (e.g., 0 for epoch 1, 1 for epoch 2, etc.)
-Resume_ep=0
+Resume_ep=1
 
 echo "Resuming training from epoch $Resume_ep"
 echo "Loading checkpoint from: ckpts/${CKPT_NAME}/pytorch_model.bin.${Resume_ep}"
