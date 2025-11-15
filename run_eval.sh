@@ -5,7 +5,7 @@ DATA_PATH=../datasets/MSRVTT
 RPort=$(shuf -i 1000-9999 -n1)
 Margin=0.1
 beta=0.2
-CKPT_NAME=TAVIGATE_L2
+CKPT_NAME=TAVIGATE
 Tau=1.0
 epoch=$(seq 1 1)
 for ep in $epoch
