@@ -12,8 +12,8 @@ CKPT_NAME=TAVIGATE_L2
 Tau=1.0
 
 # Step checkpoint to evaluate
-STEP_CKPT=800
-EPOCH_NUM=802
+STEP_CKPT=1000
+EPOCH_NUM=1002
 
 echo "Evaluating step ${STEP_CKPT} checkpoint"
 echo "Model: ckpts/${CKPT_NAME}/pytorch_model.bin.step_${STEP_CKPT}.${EPOCH_NUM}"
