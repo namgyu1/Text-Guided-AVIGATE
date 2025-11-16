@@ -7,7 +7,7 @@ Margin=0.1
 beta=0.2
 CKPT_NAME=TAVIGATE_L2
 Tau=1.0
-epoch=$(seq 4 4)
+epoch=$(seq 3 3)
 for ep in $epoch
 do
     OMP_NUM_THREADS=6 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --master_port $RPort --nproc_per_node=1 main_task_retrieval.py --do_eval --num_thread_reader=4 \
