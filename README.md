@@ -11,7 +11,7 @@ On MSRVTT (CLIP-ViT B/32):
 | Model | R@1 | R@5 | R@10 |
 | :--- | :---: | :---: | :---: |
 | Original AVIGATE (CVPR 2025) | 50.2% | 74.3% | 83.2% |
-| GAID (Recent SOTA) | 55.0% | 83.0% | 89.9% |
+| [GAID (Recent SOTA)](https://arxiv.org/pdf/2508.01711) | 55.0% | 83.0% | 89.9% |
 | **Text-Guided AVIGATE (Ours)** | **66.0%** | **88.9%** | **94.2%** |
 
 *(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE delivers significant gains of **11.0%** in R@1, **5.9%** in R@5, and **4.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
