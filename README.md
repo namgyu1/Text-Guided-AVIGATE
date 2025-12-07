@@ -8,13 +8,20 @@ The goal of this project is to improve Text-to-Video Retrieval performance by al
 ## Performance
 
 On MSRVTT (CLIP-ViT B/32):
-| Model | R@1 | R@5 | R@10 |
-| :--- | :---: | :---: | :---: |
-| Original AVIGATE (CVPR 2025) | 50.2% | 74.3% | 83.2% |
-| [GAID (Recent SOTA)](https://arxiv.org/pdf/2508.01711) | 55.0% | 83.0% | 89.9% |
-| **Text-Guided AVIGATE (Ours)** | **66.0%** | **88.9%** | **94.2%** |
-
-*(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE delivers significant gains of **11.0%** in R@1, **5.9%** in R@5, and **4.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
+| Method | Modality | R@1↑ | R@5↑ | R@10↑ | MdR↓ | MnR↓ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| CLIP4Clip (Luo et al. 2022) | V+T | 43.1 | 70.4 | 80.8 | 2.0 | 15.3 |
+| ECLIPSE (Lin et al. 2022) | A+V+T | 44.2 | 71.3 | 81.6 | 2.0 | 15.0 |
+| BridgeFormer (Ge et al. 2022) | V+T | 44.9 | 71.9 | 80.3 | 2.0 | 15.3 |
+| X-CLIP (Ma et al. 2022) | V+T | 46.1 | 73.0 | 83.1 | 2.0 | 13.2 |
+| X-Pool (Gorti et al. 2022) | V+T | 46.9 | 72.8 | 82.2 | 2.0 | 14.3 |
+| TS2-Net (Liu et al. 2022) | V+T | 47.0 | 74.5 | 83.8 | 2.0 | 13.0 |
+| TEFAL (Ibrahimi et al. 2023) | A+V+T | 49.4 | 75.9 | 83.9 | 2.0 | 12.0 |
+| CLIP-ViP (Xue et al. 2022) | V+T | 50.1 | 74.8 | 84.6 | 1.0 | - |
+| AVIGATE (Jeong et al. 2025) | A+V+T | 50.2 | 74.3 | 83.2 | 1.0 | 13.8 |
+| T-MASS (Wang et al. 2024a) | V+T | 50.2 | 75.3 | 85.1 | 1.0 | 11.9 |
+| GAID (Previous SOTA) | A+V+T | 55.0 | 83.0 | 89.9 | 1.0 | 7.7 |
+| **Text-Guided AVIGATE (Ours)** | **A+V+T** | **66.0** | **88.9** | **94.2** | **1.0** | **3.3** |*(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE delivers significant gains of **11.0%** in R@1, **5.9%** in R@5, and **4.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
 
 ---
 
