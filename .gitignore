@@ -2,8 +2,21 @@
 *.bin
 *.pt
 *.pth
-ckpts/
 logs/
+
+# ===== Experiment checkpoint outputs =====
+ckpts/**/pytorch_model.bin*
+ckpts/**/pytorch_opt.bin*
+ckpts/**/pytorch_sche.bin*
+ckpts/**/*.pt
+ckpts/**/*.pth
+ckpts/**/*.ckpt
+ckpts/**/*.tar
+ckpts/**/*.npz
+ckpts/**/*.npy
+ckpts/**/events.out.tfevents*
+ckpts/**/*.log
+ckpts/**/log.txt
 
 # ===== Cache & temp files =====
 __pycache__/
