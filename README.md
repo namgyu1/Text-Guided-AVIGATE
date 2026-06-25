@@ -142,18 +142,6 @@ run.sh
 ```sh
 run_eval.sh
 ```
-# Citation
-If you find CLIP4Clip useful in your work, you can cite the following paper:
-```bibtex
-@InProceedings{Jeong_2025_CVPR,
-    author    = {Jeong, Boseung and Park, Jicheol and Kim, Sungyeon and Kwak, Suha},
-    title     = {Learning Audio-guided Video Representation with Gated Attention for Video-Text Retrieval},
-    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-    month     = {June},
-    year      = {2025},
-    pages     = {26202-26211}
-}
-```
 
 # Acknowledgments
 Our code is based on [CLIP4Clip](https://github.com/ArrowLuo/CLIP4Clip) and [AST](https://github.com/YuanGongND/ast).
