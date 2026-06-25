@@ -24,7 +24,7 @@ On MSRVTT:
 | **Text-Guided AVIGATE (ViT-B/32)** | **A+V+T** | **66.0** | **88.9** | **94.2** | **1.0** | **3.3** |
 | **Text-Guided AVIGATE (ViT-B/16)** | **A+V+T** | **67.5** | **90.6** | **95.1** | **1.0** | **3.1** |
 
-*(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE delivers significant gains of **11.0%** in R@1, **5.9%** in R@5, and **4.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
+*(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE (ViT-B/32) delivers significant gains of **9.0%** in R@1, **5.8%** in R@5, and **3.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
 
 ---
 
