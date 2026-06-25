@@ -1,5 +1,5 @@
 # Text-Guided AVIGATE: Audio-Guided Video Representation with Text-Guided Gated Attention for Text-to-Video Retrieval
-**(Based on AVIGATE, CVPR 2025 Oral)**
+**(Based on AVIGATE, CVPR 2025)**
 
 This repository provides an extended implementation of [AVIGATE]([https://github.com/BoseungJeong/AVIGATE-CVPR2025]) with a multi-level **Text-Guided (Query-Aware)** mechanism.
 
@@ -20,7 +20,7 @@ On MSRVTT (CLIP-ViT B/32):
 | CLIP-ViP (Xue et al. 2022) | V+T | 50.1 | 74.8 | 84.6 | 1.0 | - |
 | AVIGATE (Jeong et al. 2025) | A+V+T | 50.2 | 74.3 | 83.2 | 1.0 | 13.8 |
 | T-MASS (Wang et al. 2024a) | V+T | 50.2 | 75.3 | 85.1 | 1.0 | 11.9 |
-| [GAID (Recent SOTA)](https://arxiv.org/pdf/2508.01711) | A+V+T | 55.0 | 83.0 | 89.9 | 1.0 | 7.7 |
+| [GAIS (Yang et al. 2025)](https://arxiv.org/abs/2508.01711) | A+V+T | 57.0 | 83.1 | 90.9 | 1.0 | 7.6 |
 | **Text-Guided AVIGATE (Ours)** | **A+V+T** | **66.0** | **88.9** | **94.2** | **1.0** | **3.3** |
 
 *(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE delivers significant gains of **11.0%** in R@1, **5.9%** in R@5, and **4.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
