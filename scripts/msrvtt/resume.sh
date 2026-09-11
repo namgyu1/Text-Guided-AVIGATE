@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Resume training from a checkpoint
 
 export MKL_NUM_THREADS=24

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 export MKL_NUM_THREADS=4
 export NUMEXPR_NUM_THREADS=4
 export OMP_NUM_THREADS=4
@@ -17,4 +19,3 @@ do
         --max_words 32 --max_frames 12 --batch_size_val 8 --datatype vatex --feature_framerate 1 --coef_lr 1e-3 --freeze_layer_num 12  \
         --slice_framepos 2 --loose_type --linear_patch 2d --sim_header seqTransf --pretrained_clip_name ViT-B/32 --eval_max_frame 12 --temperature $Tau --warmup_proportion 0.1 --cross_num_hidden_layers 4 --audio_query_layers 4 --beta $beta --margin_BD $Margin --init_model ckpts/${CKPT_NAME}/pytorch_model.bin.$ep
 done
-chmod -R 777 ckpts/*

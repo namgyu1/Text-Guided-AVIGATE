@@ -5,6 +5,10 @@ This repository provides an extended implementation of [AVIGATE](https://github.
 
 The goal of this project is to improve Text-to-Video Retrieval performance by allowing the semantic intent of the text query (T) to dynamically influence and control the audio-visual (V-A) fusion process.
 
+## Project Report
+
+The concise final report is available here: [Text-Guided AVIGATE Final Report](docs/Text-Guided-AVIGATE_Final_Report.pdf).
+
 ## Performance
 
 On MSRVTT:
@@ -24,7 +28,7 @@ On MSRVTT:
 | **Text-Guided AVIGATE (ViT-B/32)** | **A+V+T** | **66.0** | **88.9** | **94.2** | **1.0** | **3.3** |
 | **Text-Guided AVIGATE (ViT-B/16)** | **A+V+T** | **67.5** | **90.6** | **95.1** | **1.0** | **3.1** |
 
-*(Relative to the recent SOTA (GAID), our Text-Guided AVIGATE (ViT-B/32) delivers significant gains of **9.0%** in R@1, **5.8%** in R@5, and **3.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
+*(Relative to the recent SOTA (GAIS), our Text-Guided AVIGATE (ViT-B/32) delivers significant gains of **9.0%** in R@1, **5.8%** in R@5, and **3.3%** in R@10, demonstrating the effectiveness of our proposed text-guided fusion.)*
 
 ---
 
@@ -82,22 +86,20 @@ The results show that the query-aware gating mechanism successfully leverages fi
 ---
 
 ## Requirement
-```sh
-# From CLIP
-conda install --yes -c pytorch pytorch=1.7.1 torchvision cudatoolkit=11.0
-pip install ftfy regex tqdm
-pip install opencv-python boto3 requests pandas---
-## Requirement
+
 ```sh
 # From CLIP
 conda install --yes -c pytorch pytorch=1.7.1 torchvision cudatoolkit=11.0
 pip install ftfy regex tqdm
 pip install opencv-python boto3 requests pandas
 ```
+
 ### Conda Environment
+
 ```sh
 conda env create --file video.yml
 ```
+
 ## Data Preparing
 
 **For MSRVTT**
@@ -122,7 +124,8 @@ python preprocess/compress_video.py --input_root [raw_video_path] --output_root 
 ```
 This script will compress the video to *3fps* with width *224* (or height *224*). Modify the variables for your customization.
 
-# How to Run
+## How to Run
+
 Download CLIP (ViT-B/32) weight,
 ```sh
 wget -P ./modules https://openaipublic.azureedge.net/clip/models/40d365715913c9da98579312b702a82c18be219cc2a73407c4526f58eba950af/ViT-B-32.pt
@@ -134,15 +137,24 @@ wget -P ./modules https://openaipublic.azureedge.net/clip/models/5806e77cd80f8b5
 Download AST weight from [AST](https://github.com/YuanGongND/ast) (Pretrained Models 1: "Full AudioSet, 10 tstride, 10 fstride, with Weight Averaging (0.459 mAP)").
 
 
-**For MSR-VTT Training** 
+Run the scripts from the repository root. Dataset-specific entry points are grouped under `scripts/`.
+
+**MSR-VTT**
+
 ```sh
-run.sh
-```
-**For MSR-VTT Evaluation** 
-```sh
-run_eval.sh
+bash scripts/msrvtt/train.sh
+bash scripts/msrvtt/eval.sh
+bash scripts/msrvtt/resume.sh  # edit Resume_ep first
 ```
 
-# Acknowledgments
+**VATEX**
+
+```sh
+bash scripts/vatex/train.sh
+bash scripts/vatex/eval.sh
+bash scripts/vatex/resume.sh  # edit Resume_ep first
+```
+
+## Acknowledgments
+
 Our code is based on [CLIP4Clip](https://github.com/ArrowLuo/CLIP4Clip) and [AST](https://github.com/YuanGongND/ast).
-
