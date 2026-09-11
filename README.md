@@ -7,7 +7,7 @@ The goal of this project is to improve Text-to-Video Retrieval performance by al
 
 ## Project Report
 
-The concise final report is available here: [Text-Guided AVIGATE Final Report](docs/Text-Guided-AVIGATE_Final_Report.pdf).
+The concise final report is available here: [Text-Guided AVIGATE Final Report](docs/Text-Guided-AVIGATE.pdf).
 
 ## Performance
 
